@@ -5,7 +5,7 @@ plugins {
     id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
 }
 
-version = '5.5.5-ipadic'
+version = '5.5.5-ipadic-SNAPSHOT'
 
 java {
     toolchain {
@@ -76,12 +76,11 @@ publishing {
 
 nexusPublishing {
     repositories {
-        maven {
-            url = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
-            credentials(PasswordCredentials) {
-                username findProperty('ossrhUsername')
-                password findProperty('ossrhPassword')
-            }
+        sonatype {
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+            username = findProperty('ossrhUsername')
+            password = findProperty('ossrhPassword')
         }
     }
 }
