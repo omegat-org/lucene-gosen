@@ -1,13 +1,18 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
+    id 'signing'
     id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
 }
+
+version = '5.5.5-ipadic'
 
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(8)
     }
+    withJavadocJar()
+    withSourcesJar()
 }
 
 def antTargets = ['build', 'test', 'clean', 'javadoc', 'jar']
@@ -17,5 +22,74 @@ ant.importBuild('build.xml') { String oldTargetName ->
      } else {
          return oldTargetName
      }
-
 }
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/java'
+        }
+        resources {
+            srcDir 'src/compiled-dictionaries/ipadic'
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'lib', include: '**/*.jar')
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) { publication ->
+            groupId = 'org.omegat'
+            artifactId = 'lucene-gosen'
+            version = '5.5.5-ipadic'
+            from components.java
+
+            pom {
+                name = 'Lucene-Gosen'
+                description = 'Lucene-Gosen'
+                url = 'https://omegat.org'
+                scm {
+                    connection = "scm:git:https://github.com/omegat-org/lucene-gosen"
+                    developerConnection = "scm:git:https://github.com/omegat-org/lucene-gosen"
+                    url = "https://github.com/omegat-org/lucene-gosen"
+                }
+                licenses {
+                    license {
+                        name = 'The GNU Lesser General Public License, Version 2.1'
+                        url = 'https://www.gnu.org/licenses/licenses/lgpl-2.1.html'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'omegat'
+                        name = 'OmegaT Developers'
+                        email = 'info@omegat.org'
+                    }
+                }
+            }
+        }
+    }
+}
+
+nexusPublishing {
+    repositories {
+        maven {
+            url = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+            credentials(PasswordCredentials) {
+                username findProperty('ossrhUsername')
+                password findProperty('ossrhPassword')
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.mavenJava
+    if (!findProperty("signing.keyId")) {
+        useGpgCmd()
+    }
+}
+
