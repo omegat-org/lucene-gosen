@@ -156,7 +156,7 @@ public class SenFactory {
   /**
    * Builds a Tokenizer for the given dictionary configuration
    *
-   * @param configurationFilename The dictionary configuration filename
+   * @param dictionaryDir dictionary configuration directory
    * @return The constructed Tokenizer
    */
   private static Tokenizer getTokenizer(String dictionaryDir) {
@@ -192,7 +192,18 @@ public class SenFactory {
   public static StringTagger getStringTagger(String dictionaryDir) {
     return new StringTagger(getTokenizer(dictionaryDir));
   }
-  
+
+  /**
+   * Backport v6.0.0 interface: Creates a StringTagger from the given configuration.
+   *
+   * @param dictionaryDir a directory of dictionary
+   * @param tokenizeUnknownKatakana ignored.
+   * @return A StringTagger
+   */
+  public static StringTagger getStringTagger(String dictionaryDir, boolean tokenizeUnknownKatakana) {
+    return new StringTagger(getTokenizer(dictionaryDir));
+  }
+
   /**
    * Creates a ReadingProcessor from the given configuration
    *
