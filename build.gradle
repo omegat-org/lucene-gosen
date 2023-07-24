@@ -31,6 +31,7 @@ sourceSets {
         }
         resources {
             srcDir 'src/compiled-dictionaries/ipadic'
+            srcDir 'src/resources'
         }
     }
 }
@@ -75,7 +76,7 @@ publishing {
                 licenses {
                     license {
                         name = 'The GNU Lesser General Public License, Version 2.1'
-                        url = 'https://www.gnu.org/licenses/licenses/lgpl-2.1.html'
+                        url = 'https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html'
                     }
                 }
                 developers {
