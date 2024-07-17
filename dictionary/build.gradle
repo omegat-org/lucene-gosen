@@ -5,7 +5,7 @@ plugins {
 Properties naistProps = new Properties()
 Properties ipadicProps = new Properties()
 
-task checkBuildStatus() {
+tasks.register('checkBuildStatus') {
     naistProps.load(project.file('naist-chasen.properties').newDataInputStream())
     replaceAllProperties(naistProps)
     ipadicProps.load(project.file('ipadic.properties').newDataInputStream())
@@ -41,13 +41,15 @@ def checkExistFile(dictype, fileName) {
     return file.exists()
 }
 
-task downloadNaistChasen(dependsOn: checkBuildStatus) {
+tasks.register('downloadNaistChasen') {
+    dependsOn checkBuildStatus
     doLast {
         download(naistDictype, naistProps)
     }
 }
 
-task downloadIpadic(dependsOn: checkBuildStatus) {
+tasks.register('downloadIpadic') {
+    dependsOn checkBuildStatus
     doLast {
         download("ipadic", ipadicProps)
     }
@@ -66,19 +68,21 @@ def unpackArchive(dictype, props) {
     }
 }
 
-task unpackNaistChasen(dependsOn: downloadNaistChasen) {
+tasks.register('unpackNaistChasen') {
+    dependsOn downloadNaistChasen
     doLast {
         unpackArchive(naistDictype, naistProps)
     }
 }
 
-task unpackIpadic(dependsOn: downloadIpadic) {
+tasks.register('unpackIpadic') {
+    dependsOn downloadIpadic
     doLast {
         unpackArchive(ipadicDictype, ipadicProps)
     }
 }
 
-task clean {
+tasks.register('clean') {
     doLast {
         delete ipadicDictype, naistDictype
     }
@@ -88,13 +92,13 @@ def cleanSen(dictype) {
     delete fileTree(dir: dictype, include: '*.sen')
 }
 
-task cleanCompiledNaistChasen() {
+tasks.register('cleanCompiledNaistChasen') {
     doLast {
         cleanSen(naistDictype)
     }
 }
 
-task cleanCompiledIpadic() {
+tasks.register('cleanCompiledIpadic') {
     doLast {
         cleanSen(ipadicDictype)
     }
@@ -122,7 +126,7 @@ def preprocessDic(dictype, props) {
         println "Already preprocessed. skip preprocessing"
     } else {
         javaexec {
-            main 'net.java.sen.tools.DictionaryPreprocessor'
+            mainClass = 'net.java.sen.tools.DictionaryPreprocessor'
             classpath sourceSets.main.runtimeClasspath
             workingDir project.file(dictype)
             args "EUC-JP", dicDir, getCompiledDicDir(".")
@@ -130,13 +134,15 @@ def preprocessDic(dictype, props) {
     }
 }
 
-task preprocessNaistChasen(dependsOn: unpackNaistChasen) {
+tasks.register('preprocessNaistChasen') {
+    dependsOn unpackNaistChasen
     doLast {
         preprocessDic(naistDictype, naistProps)
     }
 }
 
-task preprocessIpadic(dependsOn: unpackIpadic) {
+tasks.register('preprocessIpadic') {
+    dependsOn unpackIpadic
     doLast {
         preprocessDic(ipadicDictype, ipadicProps)
     }
@@ -158,7 +164,7 @@ def compileDic(dictype, props) {
         println "Already compiled. skip compile"
     } else {
         javaexec {
-            main 'net.java.sen.tools.DictionaryCompiler'
+            mainClass = 'net.java.sen.tools.DictionaryCompiler'
             classpath sourceSets.main.runtimeClasspath
             workingDir project.file(getCompiledDicDir(dictype))
             if (hasProperty("customDics")) {
@@ -168,13 +174,15 @@ def compileDic(dictype, props) {
     }
 }
 
-task compileNaistChasen(dependsOn: preprocessNaistChasen) {
+tasks.register('compileNaistChasen') {
+    dependsOn preprocessNaistChasen
     doLast {
         compileDic(naistDictype, naistProps)
     }
 }
 
-task compileIpadic(dependsOn: preprocessIpadic) {
+tasks.register('compileIpadic') {
+    dependsOn preprocessIpadic
     doLast {
         compileDic(ipadicDictype, ipadicProps)
     }

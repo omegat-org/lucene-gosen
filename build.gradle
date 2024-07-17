@@ -1,95 +1,166 @@
-repositories {
-  mavenLocal()
-  mavenCentral()
-  maven {
-    url "http://maven.restlet.com"
-  }
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'signing'
+    id "io.github.gradle-nexus.publish-plugin" version "2.0.0"
+    id 'idea'
 }
-group 'com.github.lucene-gosen'
-description 'Japanese analysis for Apache Lucene/Solr'
 
-apply plugin: 'java'
-apply plugin: 'idea'
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {
+        url "https://maven.restlet.talend.com"
+    }
+}
+
+group 'org.omegat.lucene.lucene-gosen'
+description 'Japanese analysis for Apache Lucene/Solr'
 
 version = luceneVersion
 
-dependencies {
-  compile "org.apache.lucene:lucene-core:${luceneVersion}"
-  compile "org.apache.lucene:lucene-analyzers-common:${luceneVersion}"
-  compile "org.apache.lucene:lucene-codecs:${luceneVersion}"
-  compile "com.ibm.icu:icu4j:${icu4jVersion}"
-  compile "org.restlet.jee:org.restlet:${restletVersion}"
-  compile "org.restlet.jee:org.restlet.ext.servlet:${restletVersion}"
-
-  testCompile "junit:junit:${junitVersion}"
-  testCompile "org.apache.lucene:lucene-test-framework:${luceneVersion}"
-  testCompile "com.carrotsearch.randomizedtesting:randomizedtesting-runner:${randomizedrunnerVersion}"
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+    withSourcesJar()
+    withJavadocJar()
 }
 
-jar {
-  version version
+dependencies {
+    implementation "org.apache.lucene:lucene-core:${luceneVersion}"
+    implementation "org.apache.lucene:lucene-analyzers-common:${luceneVersion}"
+    implementation "org.apache.lucene:lucene-codecs:${luceneVersion}"
+    implementation "com.ibm.icu:icu4j:${icu4jVersion}"
+    implementation "org.restlet.jee:org.restlet:${restletVersion}"
+    implementation "org.restlet.jee:org.restlet.ext.servlet:${restletVersion}"
+
+    testImplementation "junit:junit:${junitVersion}"
+    testImplementation "org.apache.lucene:lucene-test-framework:${luceneVersion}"
+    testImplementation "com.carrotsearch.randomizedtesting:randomizedtesting-runner:${randomizedrunnerVersion}"
 }
 
 javadoc {
-  options.locale = 'en_US'
+    options.locale = 'en_US'
 }
-defaultTasks 'clean', 'dist'
 
 // Re-build dictionary with user custom dictionaries, without copy
-task rebuildNaistChasenDic() {
-  doLast {
-    println "rebuilding dicitonary"
-  }
+tasks.register('rebuildNaistChasenDic') {
+    doLast {
+        println "rebuilding dictionary"
+    }
+    dependsOn(compileJava, ":dictionary:cleanCompiledNaistChasen", ":dictionary:compileNaistChasen")
 }
 
-tasks.rebuildNaistChasenDic.dependsOn(compileJava, ":dictionary:cleanCompiledNaistChasen", ":dictionary:compileNaistChasen")
 
-task rebuildIpadicDic() {
-  doLast {
-    println "rebuilding dicitonary"
-  }
+tasks.register('rebuildIpadicDic') {
+    doLast {
+        println "rebuilding dictionary"
+    }
+    dependsOn(compileJava, ":dictionary:cleanCompiledIpadic", ":dictionary:compileIpadic")
 }
-
-tasks.rebuildIpadicDic.dependsOn(compileJava, ":dictionary:cleanCompiledIpadic", ":dictionary:compileIpadic")
-
 
 // Create Jar library without dictionary
-task jarWithNaistChasen(type: Jar) {
-  classifier naistDictype
-  from files(sourceSets.main.output,
-          fileTree("dictionary" + File.separator
-            + naistDictype + File.separator + compiledDicDir).include('**/*.sen')
-  )
+tasks.register('jarWithNaistChasen', Jar) {
+    archiveClassifier = naistDictype
+    from files(sourceSets.main.output,
+            fileTree("dictionary" + File.separator
+                    + naistDictype + File.separator + compiledDicDir).include('**/*.sen')
+    )
+    dependsOn(compileJava, ":dictionary:compileNaistChasen")
 }
 
-tasks.jarWithNaistChasen.dependsOn(compileJava, ":dictionary:compileNaistChasen")
-
-task jarWithIpadic(type: Jar) {
-  classifier ipadicDictype
-  from files(sourceSets.main.output,
-          fileTree("dictionary" + File.separator
-                  + ipadicDictype + File.separator + compiledDicDir).include('**/*.sen')
-  )
-}
-
-tasks.jarWithIpadic.dependsOn(compileJava, ":dictionary:compileIpadic")
-
-task javadocJar(type: Jar) {
-  classifier 'javadoc'
-  from javadoc
-}
-
-task sourcesJar(type: Jar) {
-  classifier 'sources'
-  from sourceSets.main.allSource
+tasks.register('jarWithIpadic', Jar) {
+    archiveClassifier = ipadicDictype
+    from files(sourceSets.main.output,
+            fileTree("dictionary" + File.separator
+                    + ipadicDictype + File.separator + compiledDicDir).include('**/*.sen')
+    )
+    dependsOn(compileJava, ":dictionary:compileIpadic")
 }
 
 // Make packages for distribution
-task dist(dependsOn: [jar, jarWithIpadic, jarWithNaistChasen, test]) {
+tasks.build.dependsOn(jarWithIpadic, jarWithNaistChasen)
+tasks.classes.dependsOn(":dictionary:compileNaistChasen", ":dictionary:compileIpadic")
+
+artifacts {
+    archives jar, sourcesJar, javadocJar
+    archives file: jarWithIpadic.archivePath, name: ipadicDictype, builtBy: jarWithIpadic
+    archives file: jarWithNaistChasen.archivePath, name: naistDictype, builtBy: jarWithNaistChasen
 }
 
-tasks.test.dependsOn(compileJava, ":dictionary:compileNaistChasen", ":dictionary:compileIpadic")
+javadoc {
+    failOnError = false
+    options {
+        jFlags('-Duser.language=en')
+        addStringOption('locale', 'en_US')
+        addStringOption('bottom', '<span>Copyright 2000-2024, OmegaT project and contributors</span>')
+        addStringOption('encoding', 'UTF-8')
+        addBooleanOption("Xdoclint:none", true)
+        addBooleanOption('frames', false)
+        addBooleanOption('public', true)
+    }
+}
 
-if (gradle.startParameter.taskNames.contains('uploadArchives')) {
-  apply from: 'uploadArchives.gradle'
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) { publication ->
+            groupId = 'org.omegat.lucene'
+            artifactId = 'lucene-gosen-ipadic'
+            from components.java
+
+            pom {
+                name = 'Lucene-Gosen'
+                description = 'Lucene-Gosen'
+                url = 'https://omegat.org'
+                scm {
+                    connection = "scm:git:https://github.com/omegat-org/lucene-gosen"
+                    developerConnection = "scm:git:https://github.com/omegat-org/lucene-gosen"
+                    url = "https://github.com/omegat-org/lucene-gosen"
+                }
+                licenses {
+                    license {
+                        name = 'The GNU Lesser General Public License, Version 2.1'
+                        url = 'https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'omegat'
+                        name = 'OmegaT Developers'
+                        email = 'info@omegat.org'
+                    }
+                }
+            }
+        }
+    }
+}
+
+nexusPublishing {
+    repositories.sonatype {
+        nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+        snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+        username = findProperty('ossrhUsername')
+        password = findProperty('ossrhPassword')
+    }
+}
+
+signing {
+    if (project.hasProperty("signingKey")) {
+        def signingKey = findProperty("signingKey").toString()
+        def signingPassword = findProperty("signingPassword").toString()
+        useInMemoryPgpKeys(signingKey, signingPassword)
+    } else {
+        useGpgCmd()
+    }
+    sign publishing.publications.mavenJava
+}
+
+tasks.withType(Sign).configureEach {
+    def hasKey = project.hasProperty("signingKey") || project.hasProperty("signing.gnupg.keyName")
+    onlyIf { hasKey && !project.version.toString().endsWith("-SNAPSHOT") }
 }
