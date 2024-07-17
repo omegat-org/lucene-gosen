@@ -2,7 +2,6 @@
 junit = "4.13.2"
 lucene = "8.11.3"
 icu4j = { require = "[70,73.2[", prefer = "72.1" }
-restlet = "2.3.0"
 randomizedrunner = "2.7.2"
 
 [libraries]
@@ -12,8 +11,6 @@ lucene-analyzers-common =  {module = "org.apache.lucene:lucene-analyzers-common"
 lucene-codecs = {module = "org.apache.lucene:lucene-codecs", version.ref = "lucene"}
 lucene-test-framework = {module = "org.apache.lucene:lucene-test-framework", version.ref = "lucene"}
 icu4j = {module = "com.ibm.icu:icu4j", version.ref = "icu4j"}
-restlet = {module = "org.restlet.jee:org.restlet", version.ref = "restlet"}
-restlet-servlet = {module = "org.restlet.jee:org.restlet.ext.servlet", version.ref = "restlet"}
 randomizedtesting = {module = "com.carrotsearch.randomizedtesting:randomizedtesting-runner", version.ref = "randomizedrunner"}
 
 [plugins]

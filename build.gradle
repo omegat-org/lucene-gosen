@@ -10,9 +10,6 @@ plugins {
 repositories {
     mavenLocal()
     mavenCentral()
-    maven {
-        url "https://maven.restlet.talend.com"
-    }
 }
 
 group 'org.omegat.lucene.lucene-gosen'
@@ -33,8 +30,6 @@ dependencies {
     implementation(libs.lucene.analyzers.common)
     implementation(libs.lucene.codecs)
     implementation(libs.icu4j)
-    implementation(libs.restlet)
-    implementation(libs.restlet.servlet)
     testImplementation(libs.junit)
     testImplementation(libs.lucene.test.framework)
     testImplementation(libs.randomizedtesting)
@@ -82,6 +77,17 @@ tasks.register('jarWithIpadic', Jar) {
 tasks.build.dependsOn(jarWithIpadic, jarWithNaistChasen)
 tasks.classes.dependsOn(":dictionary:compileNaistChasen", ":dictionary:compileIpadic")
 
+configurations {
+    conf
+}
+def ipadicArtifact = artifacts.add('conf', jarWithIpadic.archiveFile.get().asFile) {
+    type ipadicDictype
+    builtBy jarWithIpadic
+}
+def naistArtifact = artifacts.add('conf', jarWithNaistChasen.archiveFile.get().asFile) {
+    type naistDictype
+    builtBy jarWithNaistChasen
+}
 artifacts {
     archives jar, sourcesJar, javadocJar
     archives file: jarWithIpadic.archivePath, name: ipadicDictype, builtBy: jarWithIpadic
@@ -109,8 +115,10 @@ publishing {
     publications {
         mavenJava(MavenPublication) { publication ->
             groupId = 'org.omegat.lucene'
-            artifactId = 'lucene-gosen-ipadic'
+            artifactId = 'lucene-gosen'
             from components.java
+            artifact ipadicArtifact
+            artifact naistArtifact
 
             pom {
                 name = 'Lucene-Gosen'
