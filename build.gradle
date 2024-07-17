@@ -1,8 +1,9 @@
 plugins {
+    id 'base'
     id 'java-library'
     id 'maven-publish'
     id 'signing'
-    id "io.github.gradle-nexus.publish-plugin" version "2.0.0"
+    alias(libs.plugins.nexus.publish)
     id 'idea'
 }
 
@@ -17,7 +18,7 @@ repositories {
 group 'org.omegat.lucene.lucene-gosen'
 description 'Japanese analysis for Apache Lucene/Solr'
 
-version = luceneVersion
+version = libs.versions.lucene.get()
 
 java {
     toolchain {
@@ -28,16 +29,15 @@ java {
 }
 
 dependencies {
-    implementation "org.apache.lucene:lucene-core:${luceneVersion}"
-    implementation "org.apache.lucene:lucene-analyzers-common:${luceneVersion}"
-    implementation "org.apache.lucene:lucene-codecs:${luceneVersion}"
-    implementation "com.ibm.icu:icu4j:${icu4jVersion}"
-    implementation "org.restlet.jee:org.restlet:${restletVersion}"
-    implementation "org.restlet.jee:org.restlet.ext.servlet:${restletVersion}"
-
-    testImplementation "junit:junit:${junitVersion}"
-    testImplementation "org.apache.lucene:lucene-test-framework:${luceneVersion}"
-    testImplementation "com.carrotsearch.randomizedtesting:randomizedtesting-runner:${randomizedrunnerVersion}"
+    implementation(libs.lucene.core)
+    implementation(libs.lucene.analyzers.common)
+    implementation(libs.lucene.codecs)
+    implementation(libs.icu4j)
+    implementation(libs.restlet)
+    implementation(libs.restlet.servlet)
+    testImplementation(libs.junit)
+    testImplementation(libs.lucene.test.framework)
+    testImplementation(libs.randomizedtesting)
 }
 
 javadoc {
@@ -51,7 +51,6 @@ tasks.register('rebuildNaistChasenDic') {
     }
     dependsOn(compileJava, ":dictionary:cleanCompiledNaistChasen", ":dictionary:compileNaistChasen")
 }
-
 
 tasks.register('rebuildIpadicDic') {
     doLast {
@@ -102,7 +101,7 @@ javadoc {
     }
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = "UTF-8"
 }
 

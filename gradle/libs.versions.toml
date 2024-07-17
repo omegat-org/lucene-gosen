@@ -1,0 +1,20 @@
+[versions]
+junit = "4.13.2"
+lucene = "8.0.0"
+icu4j = "62.1"
+restlet = "2.3.0"
+randomizedrunner = "2.7.2"
+
+[libraries]
+junit = {group = "junit", name = "junit", version.ref = "junit"}
+lucene-core = {module = "org.apache.lucene:lucene-core", version.ref = "lucene"}
+lucene-analyzers-common =  {module = "org.apache.lucene:lucene-analyzers-common", version.ref = "lucene"}
+lucene-codecs = {module = "org.apache.lucene:lucene-codecs", version.ref = "lucene"}
+lucene-test-framework = {module = "org.apache.lucene:lucene-test-framework", version.ref = "lucene"}
+icu4j = {module = "com.ibm.icu:icu4j", version.ref = "icu4j"}
+restlet = {module = "org.restlet.jee:org.restlet", version.ref = "restlet"}
+restlet-servlet = {module = "org.restlet.jee:org.restlet.ext.servlet", version.ref = "restlet"}
+randomizedtesting = {module = "com.carrotsearch.randomizedtesting:randomizedtesting-runner", version.ref = "randomizedrunner"}
+
+[plugins]
+nexus-publish = {id = "io.github.gradle-nexus.publish-plugin", version = "2.0.0"}
