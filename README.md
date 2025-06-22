@@ -1,6 +1,17 @@
+# The forked version of the Lucene-Gosen
+
+Here is a forked version of the lucene-gosen project.
+A `rel-8.11` branch is a main branch of the forked project.
+
+Lucene 8.11 is a latest Lucene which support Java 8.
+Lucene 9+ requires Java 11 or Java 17.
+
+OmegaT project releases OmegaT 6.0.x that is compiled with Java 11 and bundled with JRE 17.
+The forked project is aimed to used with LanguageTool versions that uses Lucene version 8.11.3.
+
 ## Download from Maven Central
 
-* group id : com.github.lucene-gosen
+* group id : org.omegat.lucene
 * artifact id : lucene-gosen
 
 There are three types of jar files:
@@ -9,17 +20,7 @@ There are three types of jar files:
 * lucene-gosen-<version>-ipadic.jar : Java library with IPA dictionary.
 * lucene-gosen-<version>-naist-chasen.jar : Java library with Naist Chasen dictionary
 
-## Installation With Apache Solr 7.4.0:
-
-1. Download jar file from Maven Central Repository
-2. Create <your_solr_home>/<collection_dir>/lib and put this jar file in it.
-3. Copy stopwords_ja.txt and stoptags_ja.txt into <your_solr_home>/<collection_dir>/conf/lang
-4. Add "text_ja_gosen" fieldtype: see example/schema.xml.snippet for example configuration.
-
-Please refer to `example/` for an example japanese configuration with comments explaining
-   what the various configuration options are.
-
-## Installation with Apache Lucene 7.4.0:
+## Installation with Apache Lucene 8.11.3:
 
 ### Using Maven
 
@@ -28,9 +29,9 @@ Add dependency to pom.xml.
 ```
     <dependencies>
         <dependency>
-            <groupId>com.github.lucene-gosen</groupId>
+            <groupId>org.omegat.lucene</groupId>
             <artifactId>lucene-gosen</artifactId>
-            <version>7.4.0</version>
+            <version>8.11.1</version>
             <classifier>ipadic</classifier>
         </dependency>
         ...
@@ -63,10 +64,4 @@ Build jar file with Naist Chasen dictionary
 
 ```
 $ ./gradlew jarWithNaistChasen
-```
-
-Please note that you should modify the following line in `gradle.properties` if you want to build the Gosen for Solr 7.1 or before. 
-
-```
-luceneVersion = 7.4.0
 ```
