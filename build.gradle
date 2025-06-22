@@ -14,11 +14,16 @@ repositories {
 group 'org.omegat.lucene.lucene-gosen'
 description 'Japanese analysis for Apache Lucene'
 
-version = "8.11.0"
+version = "8.11.1"
+
+tasks.wrapper {
+    distributionType = Wrapper.DistributionType.BIN
+    gradleVersion = "8.14.2"
+}
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(8)
+        languageVersion = JavaLanguageVersion.of(11)
     }
     withSourcesJar()
     withJavadocJar()
@@ -148,9 +153,8 @@ publishing {
 
 nexusPublishing {
     repositories.sonatype {
-        // stagingProfileId = '15818299f2c2bb'
-        nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-        snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+        nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+        snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
         username = findProperty('ossrhUsername')
         password = findProperty('ossrhPassword')
     }
